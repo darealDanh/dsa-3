@@ -38,14 +38,60 @@ public:
     void connect(T from, T to, float weight = 0)
     {
         // TODO
+        VertexNode *from = getVertexNode(from);
+        if (from == nullptr)
+        {
+            throw VertexNotFoundException(from);
+        }
+        VertexNode *to = getVertexNode(to);
+        if (to == nullptr)
+        {
+            throw VertexNotFoundException(to);
+        }
+        if (from == to)
+        {
+            from->connect(from, weight);
+        }
+        else
+        {
+            from->connect(to, weight);
+            to->connect(from, weight);
+        }
     }
     void disconnect(T from, T to)
     {
         // TODO
+        VertexNode *from = getVertexNode(from);
+        if (from == nullptr)
+        {
+            throw VertexNotFoundException(from);
+        }
+        VertexNode *to = getVertexNode(to);
+        if (to == nullptr)
+        {
+            throw VertexNotFoundException(to);
+        }
+        if (from == to)
+        {
+            from->removeTo(from);
+        }
+        else
+        {
+            from->removeTo(to);
+            to->removeTo(from);
+        }
     }
     void remove(T vertex)
     {
         // TODO
+        VertexNode *node = getVertexNode(vertex);
+        VertexNode *current = nodeList.begin();
+        while (nodeList != nullptr)
+        {
+            current->removeTo(node);
+            current = current->next;
+        }
+        nodeList.removeItem(node);
     }
     static UGraphModel<T> *create(
         T *vertices, int nvertices, Edge<T> *edges, int nedges,
@@ -53,6 +99,17 @@ public:
         string (*vertex2str)(T &))
     {
         // TODO
+        UGraphModel<T> *graph = new UGraphModel<T>(vertexEQ, vertex2str);
+        for (int idx = 0; idx < nvertices; idx++)
+        {
+            graph->add(vertices[idx]);
+        }
+        for (int idx = 0; idx < nedges; idx++)
+        {
+            graph->connect(edges[idx].from, edges[idx].to, edges[idx].weight);
+            graph->connect(edges[idx].to, edges[idx].from, edges[idx].weight);
+        }
+        return graph;
     }
 };
 
