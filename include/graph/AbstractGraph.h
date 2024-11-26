@@ -114,46 +114,120 @@ public:
     virtual float weight(T from, T to)
     {
         // TODO
-        VertexNode *node = getVertexNode(from);
-        return node->getEdge(getVertexNode(to))->weight;
+        VertexNode *from = getVertexNode(from);
+        VertexNode *to = getVertexNode(to);
+        if (from == nullptr)
+        {
+            throw VertexNotFoundException(from);
+        }
+        if (to == nullptr)
+        {
+            throw VertexNotFoundException(to);
+        }
+        Edge *edge = from->getEdge(to);
+        if (edge == nullptr)
+        {
+            throw EdgeNotFoundException(from, to);
+        }
+        return edge->weight;
     }
     virtual DLinkedList<T> getOutwardEdges(T from)
     {
         // TODO
+        VertexNode *from = getVertexNode(from);
+        if (from == nullptr)
+        {
+            throw VertexNotFoundException(from);
+        }
+        return from->getOutwardEdges();
     }
 
     virtual DLinkedList<T> getInwardEdges(T to)
     {
         // TODO
+        VertexNode *to = getVertexNode(to);
+        if (to == nullptr)
+        {
+            throw VertexNotFoundException(to);
+        }
+        DLinkedList<T> verticesList;
+        typename DLinkedList<VertexNode *>::Iterator it = nodeList.begin();
+        while (it != nodeList.end())
+        {
+            DLinkedList<Edge *> edges = (*it)->adList;
+            while (edges != nullptr)
+            {
+                if (edges->to == to)
+                {
+                    verticesList.add(edges->from->vertex);
+                }
+                edges = edges->next;
+            }
+        }
     }
 
     virtual int size()
     {
         // TODO
+        return nodeList.size();
     }
-    virtual bool empty() {
+    virtual bool empty()
+    {
         // TODO
+        return nodeList.size() == 0;
     };
     virtual void clear()
     {
         // TODO
+        nodeList.clear();
     }
     virtual int inDegree(T vertex)
     {
         // TODO
+        VertexNode *node = getVertexNode(vertex);
+        if (node == nullptr)
+        {
+            throw VertexNotFoundException(vertex);
+        }
+        return node->inDegree();
     }
     virtual int outDegree(T vertex)
     {
         // TODO
+        VertexNode *node = getVertexNode(vertex);
+        if (node == nullptr)
+        {
+            throw VertexNotFoundException(vertex);
+        }
+        return node->outDegree();
     }
 
     virtual DLinkedList<T> vertices()
     {
         // TODO
+        DLinkedList<T> list;
+        typename DLinkedList<VertexNode *>::Iterator it = nodeList.begin();
+        while (it != nodeList.end())
+        {
+            list.add((*it)->vertex);
+            it++;
+        }
+        return list;
     }
     virtual bool connected(T from, T to)
     {
         // TODO
+        VertexNode *from = getVertexNode(from);
+        VertexNode *to = getVertexNode(to);
+        if (from == nullptr)
+        {
+            throw VertexNotFoundException(from);
+        }
+        if (to == nullptr)
+        {
+            throw VertexNotFoundException(to);
+        }
+        return from->getEdge(to) != nullptr;
     }
     void println()
     {
