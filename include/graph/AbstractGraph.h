@@ -340,15 +340,7 @@ public:
         {
             // TODO
             // get the outward edges of this vertex
-            DLinkedList<T> list;
-            typename DLinkedList<Edge *>::Iterator it = adList.begin();
-            while (it != adList.end())
-            {
-                Edge *edge = *it;
-                list.add(edge->to->vertex);
-                it++;
-            }
-            return list;
+            return this->adList;
         }
 
         Edge *getEdge(VertexNode *to)
