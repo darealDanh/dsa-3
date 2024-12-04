@@ -32,19 +32,87 @@ public:
     TopoSorter(DGraphModel<T> *graph, int (*hash_code)(T &, int) = 0)
     {
         // TODO
+        this->graph = graph;
+        this->hash_code = hash_code;
     }
     DLinkedList<T> sort(int mode = 0, bool sorted = true)
     {
         // TODO
+        if (mode == 1)
+        {
+            return bfsSort(sorted);
+        }
+        else
+        {
+            return dfsSort(sorted);
+        }
     }
     DLinkedList<T> bfsSort(bool sorted = true)
     {
         // TODO
+        DLinkedList<T> sortedList;
+        XHashMap<T, int> inDegree = vertex2inDegree(hash_code);
+        DLinkedList<T> zeroInDegrees = listOfZeroInDegrees();
+        Queue<T> queue;
+        typename DLinkedList<T>::Iterator it = zeroInDegrees.begin();
+        while (it != zeroInDegrees.end())
+        {
+            T vertex = *it;
+            queue.enqueue(vertex);
+            it++;
+        }
+        while (!queue.empty())
+        {
+            T vertex = queue.dequeue();
+            sortedList.add(vertex);
+            DLinkedList<T> adjVertices = graph->getOutwardEdges(vertex);
+            typename DLinkedList<T>::Iterator it = adjVertices.begin();
+            while (it != adjVertices.end())
+            {
+                T adjVertex = *it;
+                inDegree[adjVertex]--;
+                if (inDegree[adjVertex] == 0)
+                {
+                    queue.enqueue(adjVertex);
+                }
+                it++;
+            }
+        }
+        return sortedList;
     }
 
     DLinkedList<T> dfsSort(bool sorted = true)
     {
         // TODO
+        DLinkedList<T> sortedList;
+        XHashMap<T, int> inDegree = vertex2inDegree(hash_code);
+        DLinkedList<T> zeroInDegrees = listOfZeroInDegrees();
+        Stack<T> stack;
+        typename DLinkedList<T>::Iterator it = zeroInDegrees.begin();
+        while (it != zeroInDegrees.end())
+        {
+            T vertex = *it;
+            stack.push(vertex);
+            it++;
+        }
+        while (!stack.empty())
+        {
+            T vertex = stack.pop();
+            sortedList.add(vertex);
+            DLinkedList<T> adjVertices = graph->getOutwardEdges(vertex);
+            typename DLinkedList<T>::Iterator it = adjVertices.begin();
+            while (it != adjVertices.end())
+            {
+                T adjVertex = *it;
+                inDegree[adjVertex]--;
+                if (inDegree[adjVertex] == 0)
+                {
+                    stack.push(adjVertex);
+                }
+                it++;
+            }
+        }
+        return sortedList;
     }
 
 protected:

@@ -1,8 +1,14 @@
 {
-    "files.associations": {
-        "bit": "cpp",
-        "*.tcc": "cpp",
-        "istream": "cpp",
-        "functional": "cpp"
-    }
+  "files.associations": {
+    "bit": "cpp",
+    "*.tcc": "cpp",
+    "istream": "cpp",
+    "functional": "cpp",
+    "cstdio": "cpp",
+    "list": "cpp",
+    "deque": "cpp",
+    "string": "cpp",
+    "vector": "cpp",
+    "format": "cpp"
+  }
 }
