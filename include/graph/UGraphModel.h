@@ -38,60 +38,62 @@ public:
     void connect(T from, T to, float weight = 0)
     {
         // TODO
-        VertexNode *from = getVertexNode(from);
-        if (from == nullptr)
+        typename AbstractGraph<T>::VertexNode *fromNode = this->getVertexNode(from);
+        if (fromNode == nullptr)
         {
-            throw VertexNotFoundException(from);
+            throw VertexNotFoundException(string(1, from));
         }
-        VertexNode *to = getVertexNode(to);
-        if (to == nullptr)
+        typename AbstractGraph<T>::VertexNode *toNode = this->getVertexNode(to);
+        if (toNode == nullptr)
         {
-            throw VertexNotFoundException(to);
+            throw VertexNotFoundException(string(1, to));
         }
-        if (from == to)
+        if (fromNode == toNode)
         {
-            from->connect(from, weight);
+            fromNode->connect(toNode, weight);
         }
         else
         {
-            from->connect(to, weight);
-            to->connect(from, weight);
+            fromNode->connect(toNode, weight);
+            toNode->connect(fromNode, weight);
         }
     }
     void disconnect(T from, T to)
     {
         // TODO
-        VertexNode *from = getVertexNode(from);
-        if (from == nullptr)
+        typename AbstractGraph<T>::VertexNode *fromNode = this->getVertexNode(from);
+        if (fromNode == nullptr)
         {
-            throw VertexNotFoundException(from);
+            throw VertexNotFoundException(string(1, from));
         }
-        VertexNode *to = getVertexNode(to);
-        if (to == nullptr)
+        typename AbstractGraph<T>::VertexNode *toNode = this->getVertexNode(to);
+        if (toNode == nullptr)
         {
-            throw VertexNotFoundException(to);
+            throw VertexNotFoundException(string(1, to));
         }
-        if (from == to)
+        if (fromNode == toNode)
         {
-            from->removeTo(from);
+            fromNode->removeTo(toNode);
         }
         else
         {
-            from->removeTo(to);
-            to->removeTo(from);
+            fromNode->removeTo(toNode);
+            toNode->removeTo(fromNode);
         }
     }
     void remove(T vertex)
     {
         // TODO
-        VertexNode *node = getVertexNode(vertex);
-        VertexNode *current = nodeList.begin();
-        while (nodeList != nullptr)
+        typename AbstractGraph<T>::VertexNode *node = this->getVertexNode(vertex);
+        typename DLinkedList<typename AbstractGraph<T>::VertexNode *>::Iterator it = this->nodeList.begin();
+        while (it != this->nodeList.end())
         {
+            typename AbstractGraph<T>::VertexNode *current = *it;
             current->removeTo(node);
-            current = current->next;
+            node->removeTo(current);
+            it++;
         }
-        nodeList.removeItem(node);
+        this->nodeList.removeItem(node);
     }
     static UGraphModel<T> *create(
         T *vertices, int nvertices, Edge<T> *edges, int nedges,

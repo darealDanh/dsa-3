@@ -71,7 +71,9 @@ public:
         this->vertexEQ = vertexEQ;
         this->vertex2str = vertex2str;
     }
-    virtual ~AbstractGraph() {}
+    virtual ~AbstractGraph()
+    {
+    }
 
     typedef bool (*vertexEQFunc)(T &, T &);
     typedef string (*vertex2strFunc)(T &);
@@ -114,56 +116,54 @@ public:
     virtual float weight(T from, T to)
     {
         // TODO
-        VertexNode *from = getVertexNode(from);
-        VertexNode *to = getVertexNode(to);
-        if (from == nullptr)
+        VertexNode *fromNode = getVertexNode(from);
+        VertexNode *toNode = getVertexNode(to);
+        if (fromNode == nullptr)
         {
-            throw VertexNotFoundException(from);
+            throw VertexNotFoundException(string(1, from));
         }
-        if (to == nullptr)
+        if (toNode == nullptr)
         {
-            throw VertexNotFoundException(to);
+            throw VertexNotFoundException(string(1, to));
         }
-        Edge *edge = from->getEdge(to);
+        Edge *edge = fromNode->getEdge(toNode);
         if (edge == nullptr)
         {
-            throw EdgeNotFoundException(from, to);
+            throw EdgeNotFoundException(string(1, from) + string(1, to));
         }
         return edge->weight;
     }
     virtual DLinkedList<T> getOutwardEdges(T from)
     {
         // TODO
-        VertexNode *from = getVertexNode(from);
-        if (from == nullptr)
+        VertexNode *fromNode = getVertexNode(from);
+        if (fromNode == nullptr)
         {
-            throw VertexNotFoundException(from);
+            throw VertexNotFoundException(string(1, from));
         }
-        return from->getOutwardEdges();
+        return fromNode->getOutwardEdges();
     }
 
     virtual DLinkedList<T> getInwardEdges(T to)
     {
         // TODO
-        VertexNode *to = getVertexNode(to);
-        if (to == nullptr)
+        VertexNode *toNode = getVertexNode(to);
+        if (toNode == nullptr)
         {
-            throw VertexNotFoundException(to);
+            throw VertexNotFoundException(string(1, to));
         }
         DLinkedList<T> verticesList;
         typename DLinkedList<VertexNode *>::Iterator it = nodeList.begin();
         while (it != nodeList.end())
         {
-            DLinkedList<Edge *> edges = (*it)->adList;
-            while (edges != nullptr)
+            VertexNode *node = *it;
+            if (node->getOutwardEdges().contains(to))
             {
-                if (edges->to == to)
-                {
-                    verticesList.add(edges->from->vertex);
-                }
-                edges = edges->next;
+                verticesList.add(node->vertex);
             }
+            it++;
         }
+        return verticesList;
     }
 
     virtual int size()
@@ -187,7 +187,7 @@ public:
         VertexNode *node = getVertexNode(vertex);
         if (node == nullptr)
         {
-            throw VertexNotFoundException(vertex);
+            throw VertexNotFoundException(string(1, vertex));
         }
         return node->inDegree();
     }
@@ -197,7 +197,7 @@ public:
         VertexNode *node = getVertexNode(vertex);
         if (node == nullptr)
         {
-            throw VertexNotFoundException(vertex);
+            throw VertexNotFoundException(string(1, vertex));
         }
         return node->outDegree();
     }
@@ -217,17 +217,17 @@ public:
     virtual bool connected(T from, T to)
     {
         // TODO
-        VertexNode *from = getVertexNode(from);
-        VertexNode *to = getVertexNode(to);
-        if (from == nullptr)
+        VertexNode *fromNode = getVertexNode(from);
+        VertexNode *toNode = getVertexNode(to);
+        if (fromNode == nullptr)
         {
-            throw VertexNotFoundException(from);
+            throw VertexNotFoundException(string(1, from));
         }
-        if (to == nullptr)
+        if (toNode == nullptr)
         {
-            throw VertexNotFoundException(to);
+            throw VertexNotFoundException(string(1, to));
         }
-        return from->getEdge(to) != nullptr;
+        return fromNode->getEdge(toNode) != nullptr;
     }
     void println()
     {
@@ -340,20 +340,27 @@ public:
         {
             // TODO
             // get the outward edges of this vertex
-            return this->adList;
+            DLinkedList<T> Vlist;
+            typename DLinkedList<Edge *>::Iterator it = adList.begin();
+            while (it != adList.end())
+            {
+                Vlist.add((*it)->to->vertex);
+                it++;
+            }
+            return Vlist;
         }
 
         Edge *getEdge(VertexNode *to)
         {
             // TODO
-            Edge *list = adList;
-            while (list != nullptr)
+            typename DLinkedList<Edge *>::Iterator it = adList.begin();
+            while (it != adList.end())
             {
-                if (list->to == to)
+                if ((*it)->to == to)
                 {
-                    return list;
+                    return *it;
                 }
-                list = list->next;
+                it++;
             }
             return nullptr;
         }
@@ -366,25 +373,17 @@ public:
         void removeTo(VertexNode *to)
         {
             // TODO
-            Edge *current = adList;
-            Edge *prev = nullptr;
-            while (current != nullptr)
+            typename DLinkedList<Edge *>::Iterator it = adList.begin();
+            while (it != adList.end())
             {
-                if (current->to == to)
+                if ((*it)->to == to)
                 {
-                    if (prev == nullptr)
-                    {
-                        adList = current->next;
-                    }
-                    else
-                    {
-                        prev->next = current->next;
-                    }
-                    delete current;
+                    to->inDegree_--;
+                    this->outDegree_--;
+                    adList.removeItem((*it));
                     return;
                 }
-                prev = current;
-                current = current->next;
+                it++;
             }
         }
         int inDegree()
@@ -452,6 +451,7 @@ public:
             return os.str();
         }
     };
+
     // END of Edge
 
     // BEGIN of Iterator
